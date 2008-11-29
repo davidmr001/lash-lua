@@ -95,6 +95,14 @@ static unsigned int CRC32[] = {
     3094707162,3040238851,2985771188,
 };
 
+#include <errno.h>
+#include <string.h>
+
+#define READ_SIZE       2048
+#define ERR_STRING_LEN  512
+
+#define CRC32_INIT  4294967295
+
 /*
  * num = lash.CRC32.string2num(str)
  *
@@ -105,7 +113,7 @@ int CRC32Int(lua_State *L) {
     size_t length;
     unsigned char *data = (unsigned char *)luaL_checklstring(L, 1, &length);
     int i;
-    unsigned int crc = 4294967295;
+    unsigned int crc = CRC32_INIT;
 
     for (i = 0; i < length; i++) {
 	crc = (crc << 8) ^ CRC32[(crc >> 24) ^ data[i]];
@@ -125,14 +133,93 @@ int CRC32String(lua_State *L) {
     size_t length;
     unsigned char *data = (unsigned char *)luaL_checklstring(L, 1, &length);
     int i;
-    unsigned int crc = 4294967295;
+    unsigned int crc = CRC32_INIT;
     char hashstring[9];
 
     for (i = 0; i < length; i++) {
 	crc = (crc << 8) ^ CRC32[(crc >> 24) ^ data[i]];
     }
 
-    sprintf(hashstring, "%02x", crc);
+    sprintf(hashstring, "%08x", crc);
+
+    lua_pushstring(L, hashstring);
+    return 1;
+}
+
+/*
+ * num,err = lash.CRC32.file2num(filename)
+ *
+ *  calculates the CRC32 hash of the contents of filename
+ *  and returns it as an integer
+ *  on error return nil,errorstr
+ */
+int CRC32FileInt(lua_State *L) {
+    unsigned int crc = CRC32_INIT;
+    int i;
+    const char *filename = luaL_checkstring(L, 1);
+
+    FILE *inFile = fopen(filename, "rb");
+    int bytes;
+
+    unsigned char data[READ_SIZE];
+
+    if (inFile == NULL) {
+        char err[ERR_STRING_LEN];
+        strerror_r(errno, err, ERR_STRING_LEN);
+
+        lua_pushnil(L);
+        lua_pushfstring(L, "Cannot open file '%s' for input: %s", filename, err);
+        return 2;
+    }
+
+    while ((bytes = fread (data, 1, READ_SIZE, inFile)) != 0) {
+	for (i = 0; i < bytes; i++) {
+	    crc = (crc << 8) ^ CRC32[(crc >> 24) ^ data[i]];
+	}
+    }
+
+    fclose(inFile);
+
+    lua_pushinteger(L, crc);
+    return 1;
+}
+
+/*
+ * hexstr,err = lash.CRC32.file2num(filename)
+ *
+ *  calculates the CRC32 hash of the contents of filename
+ *  and returns it as a lowercase hexstring
+ *  on error return nil,errorstr
+ */
+int CRC32FileString(lua_State *L) {
+    unsigned int crc = CRC32_INIT;
+    int i;
+    const char *filename = luaL_checkstring(L, 1);
+    char hashstring[9];
+
+    FILE *inFile = fopen(filename, "rb");
+    int bytes;
+
+    unsigned char data[READ_SIZE];
+
+    if (inFile == NULL) {
+        char err[ERR_STRING_LEN];
+        strerror_r(errno, err, ERR_STRING_LEN);
+
+        lua_pushnil(L);
+        lua_pushfstring(L, "Cannot open file '%s' for input: %s", filename, err);
+        return 2;
+    }
+
+    while ((bytes = fread (data, 1, READ_SIZE, inFile)) != 0) {
+	for (i = 0; i < bytes; i++) {
+	    crc = (crc << 8) ^ CRC32[(crc >> 24) ^ data[i]];
+	}
+    }
+
+    fclose(inFile);
+
+    sprintf(hashstring, "%08x", crc);
 
     lua_pushstring(L, hashstring);
     return 1;
