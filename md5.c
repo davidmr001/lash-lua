@@ -319,6 +319,28 @@ static void Transform(UINT4 *buf, UINT4 *in) {
  ******************************* (cut) ********************************
  */
 
+/*
+ * Copyright (c) 2008 Neil Richardson (nrich@iinet.net.au)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy 
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights 
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
+ * copies of the Software, and to permit persons to whom the Software is 
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
+ * IN THE SOFTWARE.
+ */
+
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
@@ -327,8 +349,18 @@ static void Transform(UINT4 *buf, UINT4 *in) {
 #include <compat-5.1.h>
 #endif
 
-#define READ_SIZE 2048
+#include <errno.h>
+#include <string.h>
 
+#define READ_SIZE	2048
+#define ERR_STRING_LEN	512
+
+/*
+ * hexstr = lash.MD5.str2hex(str)
+ *
+ *  calculates the MD5 hash of str and
+ *  returns it as a lowercase hexstring
+ */
 int MD5String(lua_State *L) {
     char hashstring[33];
     size_t length;
@@ -348,6 +380,13 @@ int MD5String(lua_State *L) {
     return 1;    
 } 
 
+/*
+ * hexstr,err = lash.MD5.file2hex(filename)
+ *
+ *  calculates the MD5 hash of the contents of filename
+ *  and returns it as a lowercase hexstring
+ *  on error return nil,errorstr
+ */
 int MD5File(lua_State *L) {
     int i;
     char hashstring[33];
@@ -359,8 +398,14 @@ int MD5File(lua_State *L) {
     int bytes;
     unsigned char data[READ_SIZE];
 
-    if (inFile == NULL) 
-	luaL_error(L, "Cannot open file '%s'");
+    if (inFile == NULL) {
+	char err[ERR_STRING_LEN];	
+	strerror_r(errno, err, ERR_STRING_LEN);	
+
+	lua_pushnil(L);
+	lua_pushfstring(L, "Cannot open file '%s' for input: %s", filename, err);
+	return 2;
+    }
 
     MD5Init(&mdContext);
     while ((bytes = fread (data, 1, READ_SIZE, inFile)) != 0)
