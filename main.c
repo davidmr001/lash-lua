@@ -37,8 +37,12 @@
 
 int MD5File(lua_State *L);
 int MD5String(lua_State *L);
+
 int CRC32Int(lua_State *L);
 int CRC32String(lua_State *L);
+int CRC32FileInt(lua_State *L);
+int CRC32FileString(lua_State *L);
+
 int SHA1File(lua_State *L);
 int SHA1String(lua_State *L);
 
@@ -51,6 +55,8 @@ static const luaL_Reg lash_md5[] = {
 static const luaL_Reg lash_crc32[] = {
     {"string2num", CRC32Int},
     {"string2hex", CRC32String},
+    {"file2num", CRC32FileInt},
+    {"file2hex", CRC32FileString},
     {NULL, NULL}
 };
 
