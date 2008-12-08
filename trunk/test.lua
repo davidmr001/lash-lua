@@ -1,6 +1,6 @@
 #!/usr/bin/lua
 
-require('lash')
+local lash = require('lash')
 
 -- do hashes on either the 
 -- first command line argument

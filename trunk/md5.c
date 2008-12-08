@@ -341,19 +341,7 @@ static void Transform(UINT4 *buf, UINT4 *in) {
  * IN THE SOFTWARE.
  */
 
-#include <lua.h>
-#include <lauxlib.h>
-#include <lualib.h>
-
-#if !defined(LUA_VERSION_NUM) || (LUA_VERSION_NUM < 501)
-#include <compat-5.1.h>
-#endif
-
-#include <errno.h>
-#include <string.h>
-
-#define READ_SIZE	2048
-#define ERR_STRING_LEN	512
+#include "common.h"
 
 /*
  * hexstr = lash.MD5.str2hex(str)
@@ -375,6 +363,8 @@ int MD5String(lua_State *L) {
 
     for (h = hashstring, i = 0; i < 16; i++, h += 2)
         sprintf(h, "%02x", mdContext.digest[i]);
+
+    hashstring[32] = '\0';
 
     lua_pushstring(L, hashstring);
     return 1;    
@@ -416,6 +406,8 @@ int MD5File(lua_State *L) {
 
     for (h = hashstring, i = 0; i < 16; i++, h += 2)
 	sprintf(h, "%02x", mdContext.digest[i]);
+
+    hashstring[32] = '\0';
 
     lua_pushstring(L, hashstring);
     return 1;

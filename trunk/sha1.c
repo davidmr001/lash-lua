@@ -6,7 +6,7 @@
  *	All Rights Reserved
  *
  *****************************************************************************
- *	$Id: sha1.c,v 1.3 2008-11-29 03:26:39 nrich Exp $
+ *	$Id: sha1.c,v 1.4 2008-12-08 09:27:08 nrich Exp $
  *****************************************************************************
  *
  *  Description:
@@ -383,19 +383,7 @@ static void SHA1PadMessage(SHA1Context *context) {
  * IN THE SOFTWARE.
  */
 
-#include <lua.h>
-#include <lauxlib.h>
-#include <lualib.h>
-
-#if !defined(LUA_VERSION_NUM) || (LUA_VERSION_NUM < 501)
-#include <compat-5.1.h>
-#endif
-
-#include <errno.h>
-#include <string.h>
-
-#define READ_SIZE       2048
-#define ERR_STRING_LEN  512
+#include "common.h"
 
 /*
  * hexstr = lash.SHA1.str2hex(str)
@@ -421,6 +409,7 @@ int SHA1String(lua_State *L) {
 	    sprintf(h, "%08x", sha.Message_Digest[i]);
 	}
 
+	hashstring[40] = '\0';
 	lua_pushstring(L, hashstring);
     }
 
@@ -466,6 +455,7 @@ int SHA1File(lua_State *L) {
             sprintf(h, "%08x", sha.Message_Digest[i]);
         }
 
+	hashstring[40] = '\0';
         lua_pushstring(L, hashstring);
     }
 
