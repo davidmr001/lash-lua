@@ -71,5 +71,11 @@ LH_EXPORT int luaopen_lash(lua_State *L) {
     luaL_register(L, "lash.CRC32", lash_crc32);
     luaL_register(L, "lash.SHA1", lash_sha1);
 
+    /*
+     * push the created table to the top off the stack
+     * so "lash = require('lash')" works
+     */
+    lua_getglobal(L, "lash");
+
     return 1;
 }

@@ -20,13 +20,8 @@
  * IN THE SOFTWARE.
  */
 
-#include <lua.h>
-#include <lauxlib.h>
-#include <lualib.h>
-
-#if !defined(LUA_VERSION_NUM) || (LUA_VERSION_NUM < 501)
-#include <compat-5.1.h>
-#endif
+#include "common.h"
+#define CRC32_INIT  4294967295
 
 static unsigned int CRC32[] = {
     0,79764919,159529838,222504665,319059676,
@@ -95,14 +90,6 @@ static unsigned int CRC32[] = {
     3094707162,3040238851,2985771188,
 };
 
-#include <errno.h>
-#include <string.h>
-
-#define READ_SIZE       2048
-#define ERR_STRING_LEN  512
-
-#define CRC32_INIT  4294967295
-
 /*
  * num = lash.CRC32.string2num(str)
  *
@@ -141,6 +128,7 @@ int CRC32String(lua_State *L) {
     }
 
     sprintf(hashstring, "%08x", crc);
+    hashstring[8] = '\0';
 
     lua_pushstring(L, hashstring);
     return 1;
@@ -220,6 +208,7 @@ int CRC32FileString(lua_State *L) {
     fclose(inFile);
 
     sprintf(hashstring, "%08x", crc);
+    hashstring[8] = '\0';
 
     lua_pushstring(L, hashstring);
     return 1;
