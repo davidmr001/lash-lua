@@ -46,6 +46,9 @@ int CRC32FileString(lua_State *L);
 int SHA1File(lua_State *L);
 int SHA1String(lua_State *L);
 
+int RijndaelEncrypt(lua_State *L);
+int RijndaelDecrypt(lua_State *L);
+
 static const luaL_Reg lash_md5[] = {
     {"file2hex", MD5File},
     {"string2hex", MD5String},
@@ -66,10 +69,17 @@ static const luaL_Reg lash_sha1[] = {
     {NULL, NULL}
 };
 
+static const luaL_Reg lash_rijndael[] = {
+    {"encrypt", RijndaelEncrypt},
+    {"decrypt", RijndaelDecrypt},
+    {NULL, NULL}
+};
+
 LH_EXPORT int luaopen_lash(lua_State *L) {
     luaL_register(L, "lash.MD5", lash_md5);
     luaL_register(L, "lash.CRC32", lash_crc32);
     luaL_register(L, "lash.SHA1", lash_sha1);
+    luaL_register(L, "lash.Rijndael", lash_rijndael);
 
     /*
      * push the created table to the top off the stack
