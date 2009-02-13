@@ -14,19 +14,19 @@ MYCFLAGS=
 MYLDFLAGS=
 MYLIBS=
 
-OBJS = main.o md5.o crc32.o sha1.o
+OBJS = main.o md5.o crc32.o sha1.o rijndael.o
 
 PLATS=linux macosx
 
 all: 
 	$(MAKE) none
 
-build: luahash
+build: lash
 
 clean:
 	$(RM) $(OBJS) $(OUTLIB)
 
-luahash: $(OBJS)
+lash: $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $(OUTLIB) $(LDFLAGS)
 
 none:
@@ -61,6 +61,9 @@ main.o: main.c
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 sha1.o: sha1.c
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+rijndael.o: rijndael.c
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 .PHONY: all $(PLATS) clean none 
